@@ -38,7 +38,7 @@ const int BUFFER_SIZE = 124; // Buffer size for batching
 char commandBuffer[BUFFER_SIZE];
 int bufferIndex = 0;
 unsigned long lastBatchTime = 0;
-const unsigned long BATCH_INTERVAL = 10; // 10ms interval for batching
+const unsigned long BATCH_INTERVAL = 2; // interval in ms for batching
 
 void print_wifi_info() {
   Serial.println("(Connected to the WiFi network)");
@@ -192,5 +192,5 @@ void loop() {
   }
 
   // Add a small delay to avoid overwhelming the serial and network buffers
-  preciseDelay(delay_micros);
+  //preciseDelay(delay_micros);
 }
