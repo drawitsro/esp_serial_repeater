@@ -34,6 +34,12 @@ bool udpStarted = false;
 char incomingPacket[255];
 unsigned long delay_micros = 0;
 
+const int BUFFER_SIZE = 124; // Buffer size for batching
+char commandBuffer[BUFFER_SIZE];
+int bufferIndex = 0;
+unsigned long lastBatchTime = 0;
+const unsigned long BATCH_INTERVAL = 10; // 10ms interval for batching
+
 void print_wifi_info() {
   Serial.println("(Connected to the WiFi network)");
   Serial.print("(IP Address: ");
@@ -122,6 +128,20 @@ void checkWiFiConnection() {
   }
 }
 
+void flushBuffer() {
+  if (bufferIndex > 0) {
+    if (udp.beginPacket(remote_IP, udpPort)) {
+      udp.write((const uint8_t *)commandBuffer, bufferIndex);
+      if (!udp.endPacket()) {
+        Serial.println("(Error ending UDP packet)");
+      }
+    } else {
+      Serial.println("(Error starting UDP packet)");
+    }
+    bufferIndex = 0; // Reset buffer index after flushing
+  }
+}
+
 void setup() {
   Serial.begin(baudRate);
   Serial.println("(Waiting for serial connection...)");
@@ -134,9 +154,8 @@ void setup() {
   init_udp();
 
   // compute the delay in microseconds for serial based on baud rate
-  delay_micros = 1000000 / baudRate+1;
+  delay_micros = 1000000 / baudRate + 1;
 }
-
 
 void preciseDelay(unsigned long microseconds) {
   unsigned long start = micros();
@@ -146,17 +165,20 @@ void preciseDelay(unsigned long microseconds) {
 void loop() {
   checkWiFiConnection();
 
-  // Handle serial input and send over UDP
-  while (Serial.available()) {
-    String data = Serial.readStringUntil('\n');
-    if (udp.beginPacket(remote_IP, udpPort)) {
-      udp.write((const uint8_t *)data.c_str(), data.length());
-      if (!udp.endPacket()) {
-        Serial.println("(Error ending UDP packet)");
-      }
-    } else {
-      Serial.println("(Error starting UDP packet)");
+  // Handle serial input and store in buffer
+  while (Serial.available() && bufferIndex < BUFFER_SIZE - 1) {
+    char c = Serial.read();
+    commandBuffer[bufferIndex++] = c;
+    if (bufferIndex >= BUFFER_SIZE - 1 || (millis() - lastBatchTime) >= BATCH_INTERVAL) {
+      flushBuffer();
+      lastBatchTime = millis();
     }
+  }
+
+  // Periodically flush buffer based on interval
+  if ((millis() - lastBatchTime) >= BATCH_INTERVAL) {
+    flushBuffer();
+    lastBatchTime = millis();
   }
 
   // Handle UDP input and send to serial
@@ -165,7 +187,7 @@ void loop() {
     int len = udp.read(incomingPacket, sizeof(incomingPacket) - 1);
     if (len > 0) {
       incomingPacket[len] = '\0'; // Null-terminate the received string
-      Serial.println(incomingPacket);
+      Serial.print(incomingPacket); // Use print instead of println
     }
   }
 
