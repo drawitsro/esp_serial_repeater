@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 // Define this on the first ESP32, comment out for the second ESP32
-#define FIRST_ESP
+//#define FIRST_ESP
 int baudRate = 115200;
 const char *ssid = "MERCUSYS_D410";
 const char *password = "89459713";
@@ -34,11 +34,11 @@ bool udpStarted = false;
 char incomingPacket[255];
 unsigned long delay_micros = 0;
 
-const int BUFFER_SIZE = 124; // Buffer size for batching
+const int BUFFER_SIZE = 64; // Buffer size for batching
 char commandBuffer[BUFFER_SIZE];
 int bufferIndex = 0;
 unsigned long lastBatchTime = 0;
-const unsigned long BATCH_INTERVAL = 2; // interval in ms for batching
+const unsigned long BATCH_INTERVAL = 1; // interval in ms for batching
 
 void print_wifi_info() {
   Serial.println("(Connected to the WiFi network)");
