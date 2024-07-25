@@ -27,7 +27,7 @@ class SerialPort:
 def send_and_receive(ser1:SerialPort, ser2:SerialPort, commands:List[str], iterations:int):
     total_time = 0
     total_bytes = 0
-
+    st = time.time()
     for i in range(iterations):
         for command in commands:
             start_time = time.time()
@@ -45,11 +45,11 @@ def send_and_receive(ser1:SerialPort, ser2:SerialPort, commands:List[str], itera
 
             else:
                 print(f"Mismatch: Sent '{command}', Received '{response}'")
-
+    et = time.time()
     ser1.close()
     ser2.close()
 
-    return total_time, total_bytes
+    return et-st, total_bytes
 
 
 def connect(serial_port):
@@ -66,7 +66,7 @@ def main():
     gcode_commands = ["G0 X10 Y10", "G1 X20 Y20", "G28", "M114", "M105"]
 
     # Number of iterations
-    iterations = 100
+    iterations = 1000
     ser1 = SerialPort(port1, baudrate)
     connect(ser1)
 

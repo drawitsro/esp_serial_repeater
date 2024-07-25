@@ -32,6 +32,7 @@ WiFiUDP udp;
 bool wifi_connected = false;
 bool udpStarted = false;
 char incomingPacket[255];
+unsigned long delay_micros = 0;
 
 void print_wifi_info() {
   Serial.println("(Connected to the WiFi network)");
@@ -131,6 +132,15 @@ void setup() {
 
   connectToWiFi();
   init_udp();
+
+  // compute the delay in microseconds for serial based on baud rate
+  delay_micros = 1000000 / baudRate+1;
+}
+
+
+void preciseDelay(unsigned long microseconds) {
+  unsigned long start = micros();
+  while (micros() - start < microseconds);
 }
 
 void loop() {
@@ -160,5 +170,5 @@ void loop() {
   }
 
   // Add a small delay to avoid overwhelming the serial and network buffers
-  delay(10);
+  preciseDelay(delay_micros);
 }
