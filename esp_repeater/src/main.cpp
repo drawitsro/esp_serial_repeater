@@ -103,11 +103,21 @@ void init_udp() {
     udpStarted = udp.begin(udpPort);
     if (udpStarted) {
       Serial.println("(UDP started)");
+      Serial.println("(ok)");
       break;
     } else {
       delay(1000);
       Serial.println("(Error - Failed to start UDP)");
     }
+  }
+}
+
+void checkWiFiConnection() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("(WiFi connection lost. Attempting to reconnect...)");
+    wifi_connected = false;
+    connectToWiFi();
+    init_udp();
   }
 }
 
@@ -124,6 +134,8 @@ void setup() {
 }
 
 void loop() {
+  checkWiFiConnection();
+
   // Handle serial input and send over UDP
   while (Serial.available()) {
     String data = Serial.readStringUntil('\n');

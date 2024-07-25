@@ -30,8 +30,9 @@ def send_and_receive(ser1:SerialPort, ser2:SerialPort, commands:List[str], itera
 
     for i in range(iterations):
         for command in commands:
-            ser1.write(command)
             start_time = time.time()
+            ser1.write(command)
+
 
             # Read the response from ser2
             response = ser2.read()
@@ -51,6 +52,13 @@ def send_and_receive(ser1:SerialPort, ser2:SerialPort, commands:List[str], itera
     return total_time, total_bytes
 
 
+def connect(serial_port):
+    dta = serial_port.read()
+    while dta != '(ok)':
+        print(dta)
+        dta = serial_port.read()
+
+
 def main():
     baudrate = 115200
 
@@ -60,9 +68,11 @@ def main():
     # Number of iterations
     iterations = 100
     ser1 = SerialPort(port1, baudrate)
-    print(ser1.read())
+    connect(ser1)
+
     ser2 = SerialPort(port2, baudrate)
-    print(ser2.read())
+    connect(ser2)
+
     total_time, total_bytes = send_and_receive(ser1, ser2, gcode_commands, iterations)
 
     print(f"Total time for {iterations * len(gcode_commands)} commands: {total_time:.4f} seconds")
