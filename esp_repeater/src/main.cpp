@@ -4,7 +4,8 @@
 
 // Define this on the first ESP32, comment out for the second ESP32
 //#define FIRST_ESP
-int baudRate = 115200;
+
+
 const char *ssid = "MERCUSYS_D410";
 const char *password = "89459713";
 
@@ -19,9 +20,11 @@ IPAddress local_IP2(192, 168, 1, 251); // Second ESP32
 
 // IP addresses for the ESP32 boards
 #ifdef FIRST_ESP
+int baudRate = 460800;
 IPAddress local_IP = local_IP1;
 IPAddress remote_IP = local_IP2;
 #else
+int baudRate = 115200;
 IPAddress local_IP = local_IP2;
 IPAddress remote_IP = local_IP1;
 #endif

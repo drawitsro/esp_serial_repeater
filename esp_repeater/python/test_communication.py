@@ -3,11 +3,6 @@ import time
 from typing import List
 
 
-# Serial port settings
-port1 = 'COM3'  # Adjust as necessary
-port2 = 'COM4'  # Adjust as necessary
-
-
 class SerialPort:
     def __init__(self, port, baudrate):
         self.port = port
@@ -34,11 +29,11 @@ def send_and_receive_batch(ser1: SerialPort, ser2: SerialPort, commands: List[st
         for command in commands:
             command = f"{str(idx).zfill(5)} {command}"
             ser1.write(command)
-            send_data.append(command)   # Ensure newline is part of the sent data
+            send_data.append(command)
 
             # Read the response from ser2
             response = ser2.read()
-            read_data.append(response)   # Ensure newline is part of the read data
+            read_data.append(response)
 
             total_bytes += len(command)
             idx += 1
@@ -89,21 +84,27 @@ def send_and_receive_batch(ser1: SerialPort, ser2: SerialPort, commands: List[st
 
     return et - st, total_bytes
 
+
 def connect(serial_port):
     dta = serial_port.read()
     while dta != '(ok)':
         print(dta)
         dta = serial_port.read()
 
+
 def main():
     baudrate = 115200
+    boudrate1 = 460800
+    # Serial port settings
+    port1 = 'COM3'  # Adjust as necessary
+    port2 = 'COM4'  # Adjust as necessary
 
     # G-code commands to test
     gcode_commands = ["G0 X10 Y10;", "G1 X20 Y20;", "G28;", "M114;", "M105;"]
 
     # Number of iterations
     iterations = 1000
-    ser1 = SerialPort(port1, baudrate)
+    ser1 = SerialPort(port1, baudrate=boudrate1)
     connect(ser1)
 
     ser2 = SerialPort(port2, baudrate)
